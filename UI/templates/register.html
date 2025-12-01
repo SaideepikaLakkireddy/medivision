@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Register Form</title>
+
+  <!-- Bootstrap CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    crossorigin="anonymous"
+  />
+
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+  />
+
+  <style>
+    body {
+      background: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    .register-card {
+      background: #c9d7ff;
+      border-radius: 0px;   /* ✅ Straight corners */
+      padding: 35px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15); /* Realistic depth */
+     /* Animation */
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    .register-title {
+      color: #000000; /* Black */
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.3); /* Shadow */
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card shadow-lg register-card mt-4">
+    <h2 class="text-center fw-bold mb-4 register-title">Register</h2>
+
+    <form id="registerForm" novalidate>
+
+      <div class="mb-3">
+        <label for="firstname" class="form-label fw-semibold">First Name</label>
+        <input type="text" class="form-control" id="firstname"
+               placeholder="Enter your first name" required />
+      </div>
+
+      <div class="mb-3">
+        <label for="lastname" class="form-label fw-semibold">Last Name</label>
+        <input type="text" class="form-control" id="lastname"
+               placeholder="Enter your last name" required />
+      </div>
+
+      <div class="mb-3">
+        <label for="mobileno" class="form-label fw-semibold">Mobile</label>
+        <input type="tel" class="form-control" id="mobileno"
+               placeholder="Enter your mobile number" required />
+      </div>
+
+      <div class="mb-3">
+        <label for="email" class="form-label fw-semibold">Email Address</label>
+        <input type="email" class="form-control" id="email"
+               placeholder="Enter your email" required />
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="form-label fw-semibold">Password</label>
+        <input type="password" class="form-control" id="password"
+               placeholder="Enter password" required />
+      </div>
+
+      <div class="mb-4">
+        <label for="confirmpassword" class="form-label fw-semibold">
+          Confirm Password
+        </label>
+        <input type="password" class="form-control" id="confirmpassword"
+               placeholder="Confirm password" required />
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100 mb-3 fw-semibold">
+        Register
+      </button>
+
+      <p class="text-center text-muted mb-0">
+        Already have an account?
+        <a href="{{ url_for('login_html') }}"
+           class="fw-semibold text-decoration-none text-primary">
+          Login
+        </a>
+      </p>
+
+    </form>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+          crossorigin="anonymous"></script>
+
+  <!-- Main JS -->
+  <script type="module" src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

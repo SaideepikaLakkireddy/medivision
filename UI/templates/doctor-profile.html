@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Doctor Profile</title>
+
+<!-- Bootstrap 5 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
+
+<!-- Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+<!-- Google Fonts -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Mozilla+Headline:wght@200..700&display=swap" rel="stylesheet" />
+
+<!-- Main site styling -->
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<style>
+/* your original doctor-profile inline styles remain unchanged */
+:root{
+  --accent: #0d6efd;
+  --muted: #6b7280;
+  --card-bg: #ffffff;
+  --card-border: rgba(2,6,23,0.04);
+  --day-color: #0d6efd;
+  --time-color: #475569;
+}
+body {
+  font-family: 'Inter', system-ui;
+  background: #f7f8fb;
+  color: #0b1220;
+  padding: 20px;
+}
+.profile-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(12,34,60,0.06);
+  border: 1px solid var(--card-border);
+  padding: 18px;
+}
+.avatar {
+  width: 100%;
+  height: 220px;
+  border-radius: 10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:800;
+  color: var(--accent);
+  background: linear-gradient(180deg,#eef6ff,#fff);
+  font-size: 48px;
+  border: 1px solid rgba(13,110,253,0.06);
+}
+.meta-label { font-weight: 600; color: #0b1220; }
+.muted { color: var(--muted); }
+#doctor-map { height: 360px; border-radius: 10px; border: 1px solid #e8e8e8; }
+
+#profile-timings {
+  background: #ffffff;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 6px 18px rgba(12,34,60,0.03);
+  max-width: 680px;
+  font-family: 'Inter', sans-serif;
+}
+#profile-timings .timing-row {
+  display: flex;
+  justify-content: flex-start;
+  gap: 18px;
+  padding: 10px 12px;
+  align-items: baseline;
+  border-bottom: 1px dashed rgba(15,23,42,0.04);
+}
+#profile-timings .timing-row:last-child { border-bottom: none; }
+#profile-timings .day-label {
+  min-width: 110px;
+  font-weight: 700;
+  color: var(--day-color);
+}
+#profile-timings .time-text {
+  color: var(--time-color);
+  font-weight: 500;
+}
+#profile-timings .timing-row.today {
+  background: linear-gradient(90deg, rgba(3,145,183,0.03), rgba(255,255,255,0));
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR FROM about.html -->
+<header class="sticky-top">
+  <nav class="navbar navbar-expand-lg site-nav bg-white">
+    <div class="container-fluid">
+
+      <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('home_html') }}">
+        <img src="{{ url_for('static', filename='assets/img1.png') }}" alt="Logo" height="50" width="50" class="rounded-circle">
+        <span class="fw-bold">MEDIVISION AI</span>
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('home_html') }}">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('about_html') }}">About</a></li>
+          <li class="nav-item"><a class="nav-link active" href="{{ url_for('finddoctors_html') }}">Find Doctor</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('prediction_html') }}">Our AI</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('contact_html') }}">Contact</a></li>
+        </ul>
+          <ul class="navbar-nav ms-auto align-items-center">
+
+            <li class="nav-item" id="loginBtnContainer">
+              <button class="login-btn" onclick="window.location.href='{{ url_for('login_html') }}'">
+                Login <i class="bi bi-person ms-1"></i>
+              </button>
+            </li>
+
+            <!-- FIXED: Correct profile icon ID for script.js -->
+            <li class="nav-item d-none ms-3" id="profileIconContainer" title="Profile">
+              <i class="bi bi-person-circle" id="openProfileBtn" role="button"></i>
+            </li>
+
+          </ul>
+
+      </div>
+
+    </div>
+  </nav>
+</header>
+
+<!-- PROFILE BODY (unchanged) -->
+<div class="container">
+  <div class="profile-card mx-auto" style="max-width:1100px;">
+    <div class="row g-3">
+
+      <div class="col-lg-4">
+        <div class="avatar" id="avatar">DR</div>
+
+        <div class="mt-3">
+          <h3 id="profile-name" class="mb-1">—</h3>
+          <p id="profile-specialization" class="mb-0 text-muted">—</p>
+          <p id="profile-other-specialization" class="mb-0 muted"></p>
+
+          <hr>
+
+          <p class="mb-1"><span class="meta-label">Experience:</span> <span id="profile-experience"></span></p>
+          <p class="mb-1"><span class="meta-label">Consultation Fee:</span> ₹<span id="profile-fee"></span></p>
+          <p class="mb-1">
+            <span class="meta-label">Rating:</span> <span id="profile-rating"></span>
+            &nbsp;
+            <span class="meta-label">Stories:</span> <span id="profile-patient-stories"></span>
+          </p>
+          <p class="mb-1"><span class="meta-label">Contact:</span> <span id="profile-contact"></span></p>
+          <p class="mb-1"><span class="meta-label">Address:</span> <span id="profile-address"></span></p>
+
+          <button id="open-google" class="btn btn-primary mt-3">Get Directions</button>
+        </div>
+      </div>
+
+      <div class="col-lg-8">
+        <h5 class="mb-2">Timings</h5>
+        <div id="profile-timings">-</div>
+
+        <h5 class="mt-4 mb-2">Location</h5>
+        <div id="doctor-map" class="mb-2"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER FROM about.html -->
+<footer>
+  <div class="footer-container">
+    <div class="footer-section">
+      <h3>About</h3>
+      <ul>
+        <li><a href="#">Care</a></li>
+        <li><a href="#">Trust</a></li>
+        <li><a href="#">Quality</a></li>
+        <li><a href="#">Service</a></li>
+        <li><a href="#">Safety</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-section">
+      <h3>Services</h3>
+      <ul>
+        <li><a href="#">Clinic</a></li>
+        <li><a href="#">Emergency</a></li>
+        <li><a href="#">Pharmacy</a></li>
+        <li><a href="#">Diseases</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-section">
+      <h3>Contact</h3>
+      <ul>
+        <li><i class="bi bi-telephone me-2"></i><a href="tel:+919876543210">+91 8522974922</a></li>
+        <li><i class="bi bi-envelope me-2"></i><a href="mailto:support@HEALTHCARE.com">support@HEALTHCARE.com</a></li>
+        <li><i class="bi bi-geo-alt me-2"></i>Hyderabad, 500001, India</li>
+        <li><i class="bi bi-globe me-2"></i><a href="https://HEALTHCARE.com">www.HEALTHCARE.com</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-section">
+      <h3>Follow Us</h3>
+      <div class="social-icons">
+        <a href="https://www.facebook.com"><i class="bi bi-facebook"></i></a>
+        <a href="https://www.linkedin.com"><i class="bi bi-linkedin"></i></a>
+        <a href="https://www.twitter.com"><i class="bi bi-twitter"></i></a>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    © 2025 HealthCare. All rights reserved.
+  </div>
+</footer>
+
+<!-- SIDEBAR FROM about.html -->
+<div id="profileSidebar" class="profile-sidebar" aria-hidden="true">
+  <div>
+    <div class="sidebar-header">
+      <i class="bi bi-person-circle sidebar-icon"></i>
+      <h4 id="sidebarName">User Name</h4>
+      <p id="sidebarEmail">user@example.com</p>
+      <p id="sidebarMobile">Mobile:</p>
+    </div>
+
+    <div class="sidebar-content">
+      <a href="{{ url_for('health_records_html') }}" class="btn btn-light w-100 mb-3">Health Records</a>
+    </div>
+  </div>
+<div>
+    <button class="btn btn-danger w-100" id="logoutBtn">Logout</button>
+  </div>
+</div>
+
+<div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+<!-- JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<script type="module" src="{{ url_for('static', filename='script.js') }}"></script>
+
+<script>
+/* your entire original JS remains EXACTLY as before */
+const params = new URLSearchParams(window.location.search);
+const doctorName = params.get("name");
+const $ = id => document.getElementById(id);
+
+let doctorsData = [];
+let doctor = null;
+
+fetch("{{ url_for('static', filename='csvjson[1].json') }}")
+  .then(r => r.json())
+  .then(data => {
+    doctorsData = data;
+    doctor = doctorsData.find(d => d.Name === doctorName);
+    if(!doctor){ alert("Doctor not found."); return; }
+    populateProfile(doctor);
+    initMap(doctor);
+  });
+
+function populateProfile(d){
+  $('profile-name').innerText = d.Name || "-";
+  $('profile-specialization').innerText = d.Specialization || "-";
+  $('profile-other-specialization').innerText = d.Other_Specialization || "-";
+  $('profile-experience').innerText = d.Experience || "-";
+  $('profile-fee').innerText = d.Consult_Fee ?? "-";
+  $('profile-rating').innerText = d.Rating ?? "-";
+  $('profile-patient-stories').innerText = d.Patient_stories ?? "-";
+  $('profile-contact').innerText = d.Contact || "-";
+  $('profile-address').innerText = d.Address || "-";
+
+  const initials = (d.Name||'DR').split(' ').slice(0,2).map(s=>s[0]).join('').toUpperCase();
+  $('avatar').innerText = initials;
+
+  renderTimings(d);
+}
+
+function renderTimings(d){
+  const days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+  const container = $('profile-timings');
+  container.innerHTML = "";
+
+  const timingsMap = {};
+
+  days.forEach(day => {
+    if (d[day] && String(d[day]).trim()) timingsMap[day] = String(d[day]).trim();
+  });
+
+  if (Object.keys(timingsMap).length === 0) {
+    const raw = (d.Timings || '').trim();
+    if (raw) {
+      raw.split(/\r?\n/).forEach(line => {
+        const m = line.match(/^\s*([A-Za-z]+)\s*:\s*(.+)$/);
+        if (m) {
+          const day = m[1][0].toUpperCase() + m[1].slice(1).toLowerCase();
+          if (days.includes(day)) timingsMap[day] = m[2].trim();
+        }
+      });
+    }
+  }
+
+  if (Object.keys(timingsMap).length === 0) {
+    container.textContent = "-";
+    return;
+  }
+
+  const mapIndexToDay = {1:"Monday",2:"Tuesday",3:"Wednesday",4:"Thursday",5:"Friday",6:"Saturday",0:"Sunday"};
+  const todayName = mapIndexToDay[new Date().getDay()];
+
+  days.forEach(day => {
+    const val = timingsMap[day];
+    if (!val) return;
+
+    const row = document.createElement('div');
+    row.className = 'timing-row' + (day === todayName ? ' today' : '');
+    row.innerHTML = `<div class="day-label">${day}</div><div class="time-text">${val}</div>`;
+    container.appendChild(row);
+  });
+}
+
+function initMap(d){
+  const lat = parseFloat(d.Latitude);
+  const lng = parseFloat(d.Longitude);
+
+  const map = L.map('doctor-map').setView([lat, lng], 15);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+  L.marker([lat, lng]).addTo(map).bindPopup(`<b>${d.Name}</b><br>${d.Address || ''}`);
+}
+
+document.getElementById('open-google').addEventListener('click', () => {
+  if (!doctor) return;
+  const lat = doctor.Latitude;
+  const lng = doctor.Longitude;
+
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const url = `https://www.google.com/maps/dir/?api=1&origin=${pos.coords.latitude},${pos.coords.longitude}&destination=${lat},${lng}`;
+      window.open(url, "_blank");
+    },
+    () => {
+      window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, "_blank");
+    }
+  );
+});
+</script>
+
+</body>
+</html>

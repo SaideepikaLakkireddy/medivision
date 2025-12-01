@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Medical AI Scanner</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome (for .fa-solid icons) -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+   <!-- Google Fonts -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Mozilla+Headline:wght@200..700&display=swap" rel="stylesheet" />
+  <!-- Your CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <header class="sticky-top">
+    <nav class="navbar navbar-expand-lg site-nav">
+      <div class="container-fluid">
+
+        <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('home_html') }}">
+          <img src="{{ url_for('static', filename='assets/img1.png') }}"
+               alt="Logo" height="50" width="50" class="rounded-circle">
+          <span class="fw-bold">MEDIVISION AI</span>
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('home_html') }}">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('about_html') }}">About</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('finddoctors_html') }}">Find Doctor</a></li>
+            <li class="nav-item"><a class="nav-link active" href="{{ url_for('prediction_html') }}">Our AI</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('contact_html') }}">Contact</a></li>
+          </ul>
+
+          <ul class="navbar-nav ms-auto align-items-center">
+
+            <li class="nav-item" id="loginBtnContainer">
+              <button class="login-btn" onclick="window.location.href='{{ url_for('login_html') }}'">
+                Login <i class="bi bi-person ms-1"></i>
+              </button>
+            </li>
+
+            <!-- FIXED: Correct profile icon ID for script.js -->
+            <li class="nav-item d-none ms-3" id="profileIconContainer" title="Profile">
+              <i class="bi bi-person-circle" id="openProfileBtn" role="button"></i>
+            </li>
+
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="py-4 prediction-page">
+    <div class="container">
+      <div id="descriptionSection" class="mx-auto">
+
+        <h2 class="text-center">Welcome to AI Medical Scanner</h2>
+
+        <div class="d-flex flex-column flex-lg-row gap-4 mt-4 description-row">
+
+          <div class="sub-box">
+            <p><strong>SkinGuard AI</strong> is a smart skin-image classification model designed exclusively for dermatology. 
+              It analyzes uploaded skin photos to detect abnormalities and provides instant, reliable predictions. 
+              The model identifies whether a lesion is benign or malignant and supports both single-image uploads and ZIP file inputs, delivering fast and accurate results every time.</p>
+
+            <!-- replaced inline onclick with data-target + class so JS can intercept and check auth -->
+            <button type="button" class="btn btn-primary go-predict" data-target="{{ url_for('skin_prediction') }}">
+              Go to Skin Prediction
+            </button>
+          </div>
+
+          <div class="sub-box">
+            <p><strong>ThoraxAI</strong> is an AI-powered deep learning system that analyzes chest X-ray images and predicts the disease present in the uploaded scan. The user uploads a single X-ray, and ThoraxAI processes it, identifies abnormalities, and gives the most likely disease along with a confidence score. 
+              It also recommends the right type of doctor based on the predicted condition, making diagnosis faster, easier, and more accessible.</p>
+
+            <!-- same here -->
+            <button type="button" class="btn btn-primary go-predict" data-target="{{ url_for('xray_prediction_page') }}">
+              Go to X-ray Prediction
+            </button>
+          </div>
+
+        </div>
+
+        <!-- removed the "Login to Save" banner per your request -->
+      </div>
+    </div>
+  </main>
+
+  <!-- SIDEBAR -->
+  <aside id="profileSidebar" class="profile-sidebar" aria-hidden="true">
+
+    <div>
+      <div class="sidebar-header">
+        <i class="bi bi-person-circle sidebar-icon"></i>
+        <h4 id="sidebarName">User Name</h4>
+        <p id="sidebarEmail">user@example.com</p>
+        <p id="sidebarMobile">Mobile:</p>
+      </div>
+
+      <div class="sidebar-content">
+        <a href="{{ url_for('health_records_html') }}" class="btn btn-light w-100 mb-3">Health Records</a>
+      </div>
+    </div>
+
+    <div>
+    <button class="btn btn-danger w-100" id="logoutBtn">Logout</button>
+  </div>
+
+  </aside>
+
+  <div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+  <!-- FOOTER -->
+  <footer>
+  <div class="footer-container container">
+
+    <div class="footer-section">
+      <h3>About</h3>
+      <ul>
+        <li><a href="#">Care</a></li>
+        <li><a href="#">Trust</a></li>
+        <li><a href="#">Quality</a></li>
+        <li><a href="#">Service</a></li>
+        <li><a href="#">Safety</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-section">
+      <h3>Services</h3>
+      <ul>
+        <li><a href="#">Clinic</a></li>
+        <li><a href="#">Emergency</a></li>
+        <li><a href="#">Pharmacy</a></li>
+        <li><a href="#">Diseases</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-section">
+      <h3>Contact</h3>
+      <ul>
+        <li><i class="bi bi-telephone me-2"></i><a href="tel:+919876543210">+91 8522974922</a></li>
+        <li><i class="bi bi-envelope me-2"></i><a href="mailto:support@HEALTHCARE.com">support@HEALTHCARE.com</a></li>
+        <li><i class="bi bi-geo-alt me-2"></i>Hyderabad, 500001, India</li>
+        <li><i class="bi bi-globe me-2"></i><a href="https://HEALTHCARE.com">www.HEALTHCARE.com</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-section">
+      <h3>Follow Us</h3>
+      <div class="social-icons">
+        <a href="https://www.facebook.com"><i class="bi bi-facebook"></i></a>
+        <a href="https://www.linkedin.com"><i class="bi bi-linkedin"></i></a>
+        <a href="https://www.twitter.com"><i class="bi bi-twitter"></i></a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Centered bottom footer -->
+  <div class="footer-bottom text-center mt-3">
+    © 2025 HealthCare. All rights reserved.
+  </div>
+</footer>
+
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- main JS (your existing script) -->
+  <script type="module" src="{{ url_for('static', filename='script.js') }}"></script>
+
+  <!-- Auth-check + prediction-button interception script -->
+  <script type="module">
+    // import auth from your firebase-init.js
+    // adjust the import path if your firebase-init.js is located elsewhere (this assumes it's served from /static/)
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+    import { auth } from "{{ url_for('static', filename='firebase-init.js') }}";
+
+    // keep track of login state
+    let isLoggedIn = false;
+
+    // update UI for sidebar and login button visibility
+    function updateAuthUI(user) {
+      const loginContainer = document.getElementById('loginBtnContainer');
+      const profileIconContainer = document.getElementById('profileIconContainer');
+      const sidebarName = document.getElementById('sidebarName');
+      const sidebarEmail = document.getElementById('sidebarEmail');
+
+      if (user) {
+        isLoggedIn = true;
+        // hide login button, show profile icon
+        if (loginContainer) loginContainer.style.display = 'none';
+        if (profileIconContainer) profileIconContainer.classList.remove('d-none');
+
+        sidebarName.textContent = user.displayName || 'User';
+        sidebarEmail.textContent = user.email || '';
+      } else {
+        isLoggedIn = false;
+        if (loginContainer) loginContainer.style.display = '';
+        if (profileIconContainer) profileIconContainer.classList.add('d-none');
+
+        sidebarName.textContent = 'User Name';
+        sidebarEmail.textContent = 'user@example.com';
+      }
+    }
+
+    // attach auth state listener
+    onAuthStateChanged(auth, (user) => {
+      updateAuthUI(user);
+    });
+
+    // intercept prediction buttons
+    function attachPredictionGuards() {
+      const predictButtons = Array.from(document.querySelectorAll('.go-predict'));
+      predictButtons.forEach(btn => {
+        // remove any inline handlers just in case (they were removed earlier)
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const target = btn.dataset.target;
+          if (!target) return;
+
+          if (!isLoggedIn) {
+            // ask user to login first
+            const goLogin = confirm('Please log in first !');
+            if (goLogin) {
+              // redirect to login page
+              window.location.href = "{{ url_for('login_html') }}";
+            } else {
+              // user chose to stay — do nothing
+            }
+          } else {
+            // proceed to prediction page
+            window.location.href = target;
+          }
+        });
+      });
+    }
+
+    // run on DOM ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', attachPredictionGuards);
+    } else {
+      attachPredictionGuards();
+    }
+  </script>
+
+</body>
+</html>

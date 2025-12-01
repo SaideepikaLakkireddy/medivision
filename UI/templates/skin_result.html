@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Skin Prediction Results</title>
+
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Mozilla+Headline:wght@200..700&display=swap" rel="stylesheet" />
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+<!-- Global stylesheet -->
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<style>
+body {
+    background: #fff !important;
+    font-family: "Segoe UI", sans-serif;
+    margin: 0;
+    padding: 0;
+}
+.results-wrapper {
+    padding: 20px;
+    min-height: calc(100vh - 160px);
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+/* Card */
+.results-wrapper .card {
+    border-radius:12px;
+    box-shadow:0 2px 12px rgba(0,0,0,0.15);
+    background:#c9d7ff;
+    padding:25px;
+    margin-bottom:20px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: slideFadeIn 0.7s ease-out forwards;
+    width: 100%;
+}
+
+.results-wrapper .card h2 {
+    text-align:center;
+    margin-bottom:20px;
+}
+
+.thumb {
+    width:80px;
+    height:80px;
+    object-fit:cover;
+    border-radius:8px;
+}
+
+/* Future scope */
+.results-wrapper .future-scope {
+    margin-top:30px;
+    background:white;
+    padding:20px;
+    border-radius:10px;
+}
+.results-wrapper .future-scope h2 {
+    text-align:center;
+    margin-bottom:15px;
+}
+
+/* Back button */
+.results-wrapper .clear-btn {
+    width:50%;
+    margin:20px auto 0;
+    padding:10px;
+    background:#d82e3f;
+    color:white;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    display:block;
+}
+
+/* Print Styles */
+@media print {
+
+  header, footer, #profileSidebar, #sidebarOverlay {
+    display: none !important;
+  }
+
+  .btn, .clear-btn {
+    display: none !important;
+  }
+
+  .results-wrapper, .card {
+    box-shadow: none !important;
+    border: none !important;
+    background: #fff !important;
+    width: 100% !important;
+    margin: 0;
+    padding: 0;
+  }
+
+  table, th, td {
+    border: 1px solid #000 !important;
+    color: #000 !important;
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
+  }
+
+  .thumb {
+    width: 70px !important;
+    height: 70px !important;
+  }
+}
+
+@keyframes slideFadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+footer { margin-top: 24px; }
+</style>
+</head>
+<body>
+
+<script>
+window.SKIN_RESULT = {{ skin_result|tojson|default('null') }};
+window.SKIN_ZIP_RESULTS = {{ skin_zip_results|tojson|default('null') }};
+</script>
+
+<!-- NAVBAR -->
+<header class="sticky-top">
+  <nav class="navbar navbar-expand-lg site-nav">
+    <div class="container-fluid">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('home_html') }}">
+        <img src="{{ url_for('static', filename='assets/img1.png') }}" alt="Logo" height="50" width="50" class="rounded-circle">
+        <span class="fw-bold">MEDIVISION AI</span>
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('home_html') }}">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('about_html') }}">About</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('finddoctors_html') }}">Find Doctor</a></li>
+          <li class="nav-item"><a class="nav-link active" href="{{ url_for('prediction_html') }}">Our AI</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('contact_html') }}">Contact</a></li>
+        </ul>
+
+        <ul class="navbar-nav ms-auto align-items-center">
+          <li class="nav-item" id="loginBtnContainer">
+            <button type="button" class="login-btn" onclick="location.href='{{ url_for('login_html') }}'">
+              Login <i class="bi bi-person"></i>
+            </button>
+          </li>
+
+          <li class="nav-item d-none ms-3" id="profileIconContainer" title="Profile">
+            <i class="bi bi-person-circle" id="openProfileBtn" role="button"></i>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+
+<!-- SIDEBAR -->
+<aside id="profileSidebar" class="profile-sidebar" aria-hidden="true">
+  <div>
+    <div class="sidebar-header">
+      <i class="bi bi-person-circle sidebar-icon"></i>
+      <h4 id="sidebarName">User Name</h4>
+      <p id="sidebarEmail">user@example.com</p>
+      <p id="sidebarMobile">Mobile:</p>
+    </div>
+    <div class="sidebar-content">
+      <a href="{{ url_for('health_records_html') }}" class="btn btn-light w-100 mb-3">Health Records</a>
+    </div>
+  </div>
+  <div>
+    <button class="btn btn-danger w-100" id="logoutBtn">Logout</button>
+  </div>
+</aside>
+<div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+
+<!-- MAIN -->
+<main class="results-wrapper">
+  <div class="container d-flex justify-content-center">
+    <div class="card" style="max-width:1100px;">
+      <h2>Skin Prediction Results</h2>
+
+      <div id="resultsTable"></div>
+
+      <button class="btn btn-primary btn-sm px-4 py-2 mx-auto d-block my-3" onclick="window.print()">
+        <i class="bi bi-printer me-2"></i> Print
+      </button>
+
+      <div class="future-scope">
+        <h2>Future Scope</h2>
+        <ul>
+          <li>Multi-Class Disease Detection: melanoma, eczema, psoriasis, infections.</li>
+          <li>Real-Time Mobile Scanning: live camera analysis for instant screening.</li>
+          <li>AI-Powered Risk Scoring: progression indicators and severity scoring.</li>
+          <li>Dermatologist Integration: second opinions and treatment recommendations.</li>
+          <li>3D Skin Mapping: depth-based analysis for complex lesions.</li>
+          <li>Continuous Model Improvement: larger, diverse datasets and regular updates.</li>
+          <li>EHR/Clinic Integration: streamline diagnostics and patient records.</li>
+          <li>Privacy-Focused On-Device Inference: offline and secure local predictions.</li>
+        </ul>
+      </div>
+
+      <button class="clear-btn" onclick="window.location.href='{{ url_for('skin_prediction') }}'">Back to Prediction</button>
+    </div>
+  </div>
+</main>
+
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-container container">
+    <div class="footer-section">
+      <h3>About</h3>
+      <ul>
+        <li><a href="#">Care</a></li>
+        <li><a href="#">Trust</a></li>
+        <li><a href="#">Quality</a></li>
+        <li><a href="#">Service</a></li>
+        <li><a href="#">Safety</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-section">
+      <h3>Services</h3>
+      <ul>
+        <li><a href="#">Clinic</a></li>
+        <li><a href="#">Emergency</a></li>
+        <li><a href="#">Pharmacy</a></li>
+        <li><a href="#">Diseases</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-section">
+      <h3>Contact</h3>
+      <ul>
+        <li><i class="bi bi-telephone me-2"></i><a href="tel:+919876543210">+91 8522974922</a></li>
+        <li><i class="bi bi-envelope me-2"></i><a href="mailto:support@HEALTHCARE.com">support@HEALTHCARE.com</a></li>
+        <li><i class="bi bi-geo-alt me-2"></i>Hyderabad, 500001, India</li>
+        <li><i class="bi bi-globe me-2"></i><a href="https://HEALTHCARE.com">www.HEALTHCARE.com</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-section">
+      <h3>Follow Us</h3>
+      <div class="social-icons">
+        <a href="#"><i class="bi bi-facebook"></i></a>
+        <a href="#"><i class="bi bi-linkedin"></i></a>
+        <a href="#"><i class="bi bi-twitter"></i></a>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-bottom">© 2025 HealthCare. All rights reserved.</div>
+</footer>
+
+
+<!-- JS TO GENERATE TABLE (UPDATED) -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const single = window.SKIN_RESULT || null;
+    const zip = window.SKIN_ZIP_RESULTS || null;
+
+    const benignDesc = "Non-cancerous lesion. Usually harmless and slow-growing. Monitoring and routine dermatology check-ups recommended.";
+    const malignantDesc = "Potentially cancerous lesion. Indicates abnormal cell growth and requires urgent clinical evaluation.";
+
+    function conf(item){
+        if(item.confidence_percent) return item.confidence_percent.toFixed(2);
+        if(item.confidence) return (item.confidence * 100).toFixed(2);
+        return "-";
+    }
+
+    function tick(x){ return x ? "✓" : ""; }
+
+    function desc(label){
+      if(label === "Benign") return benignDesc;
+      if(label === "Malignant") return malignantDesc;
+      return "-";
+    }
+
+    function row(item){
+    const isBenign = item.label === "Benign";
+    const isMalignant = item.label === "Malignant";
+
+    return `
+    <tr>
+      <td>${item.filename || "-"}</td>
+      <td>${item.label || "-"}</td>
+      <td>${conf(item)}</td>
+      <td>${item.raw !== undefined ? item.raw.toFixed(4) : "-"}</td>
+      <td>${item.low_confidence ? "Yes" : "No"}</td>
+
+      <!-- Benign Column: ✓ if benign else ✗ -->
+      <td>${isBenign ? "✓" : "✗"}</td>
+
+      <!-- Malignant Column: ✓ if malignant else ✗ -->
+      <td>${isMalignant ? "✓" : "✗"}</td>
+
+      <td>${desc(item.label)}</td>
+      <td>${item.image_url ? `<img class='thumb' src='${item.image_url}'>` : "-"}</td>
+    </tr>`;
+}
+
+    let rows = "";
+    if(single) rows += row(single);
+    if(Array.isArray(zip)) zip.forEach(i => rows += row(i));
+
+    const tableHTML = `
+      <div class="table-responsive mt-3">
+        <table class="table table-bordered table-hover align-middle">
+          <thead class="table-primary">
+            <tr>
+              <th>Filename</th>
+              <th>Label</th>
+              <th>Confidence (%)</th>
+              <th>Raw Value</th>
+              <th>Low Confidence</th>
+              <th>Benign</th>
+              <th>Malignant</th>
+              <th>Description</th>
+              <th>Image</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    `;
+
+    document.getElementById("resultsTable").innerHTML = tableHTML;
+});
+</script>
+
+
+<!-- FIREBASE SAVE LOGIC -->
+<script type="module">
+  import { savePredictionsFromResult } from "/static/script.js";
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    const single = window.SKIN_RESULT || null;
+    const zip = Array.isArray(window.SKIN_ZIP_RESULTS) ? window.SKIN_ZIP_RESULTS : null;
+
+    if (!single && !zip) return;
+
+    try {
+      await savePredictionsFromResult({ type: "skin", single, zip });
+      console.log("Skin results: auto-save attempted.");
+    } catch (err) {
+      console.error("auto-save skin error:", err);
+    }
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script type="module" src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>

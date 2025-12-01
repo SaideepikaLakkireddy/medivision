@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>X-ray Prediction Results</title>
+
+<!-- Bootstrap + icons + global stylesheet -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Mozilla+Headline:wght@200..700&display=swap" rel="stylesheet" />
+
+<style>
+.results-page {
+  background: white !important;
+  font-family: "Segoe UI", sans-serif;
+  padding: 20px;
+  min-height: calc(100vh - 160px);
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.results-container {
+  width: 100%;
+  max-width: 1100px;
+  margin: 10px auto;
+}
+
+.results-card {
+  border-radius:12px;
+  box-shadow:0 2px 12px rgba(0,0,0,0.15);
+  background:#c9d7ff;
+  padding:25px;
+  margin-bottom:20px;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: slideFadeIn 0.7s ease-out forwards;
+}
+
+.results-card h2 { text-align:center; margin-bottom:20px; }
+
+.thumb {
+  width:80px;
+  height:80px;
+  object-fit:cover;
+  border-radius:6px;
+}
+
+/* Buttons */
+.clear-btn {
+  width:50%;
+  margin:20px auto 0;
+  padding:10px;
+  background:#d82e3f;
+  color:white;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  display:block;
+}
+
+/* Print styles */
+@media print {
+  header, footer, #profileSidebar, #sidebarOverlay {
+    display: none !important;
+  }
+  .btn, .clear-btn {
+    display: none !important;
+  }
+  .results-page, .results-card {
+    background: white !important;
+    box-shadow: none !important;
+    width: 100% !important;
+    margin: 0;
+    padding: 0;
+  }
+  table, th, td {
+    border: 1px solid black !important;
+    color: black !important;
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
+  }
+  .thumb {
+    width: 70px !important;
+    height: 70px !important;
+  }
+}
+
+.future-scope {
+  margin-top:30px;
+  background:white;
+  padding:20px;
+  border-radius:10px;
+}
+.future-scope h2 { text-align:center; margin-bottom:15px; }
+
+@keyframes slideFadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 576px) {
+  .clear-btn { width:80%; }
+}
+</style>
+</head>
+<body>
+
+<script>
+  window.XRAY_RESULT = {{ xray_result|tojson|default('null') }};
+  window.XRAY_ZIP_RESULTS = {{ xray_zip_results|tojson|default('null') }};
+</script>
+
+<!-- NAVBAR -->
+<header class="sticky-top">
+  <nav class="navbar navbar-expand-lg site-nav">
+    <div class="container-fluid">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('home_html') }}">
+        <img src="{{ url_for('static', filename='assets/img1.png') }}" height="50" width="50" class="rounded-circle">
+        <span class="fw-bold">MEDIVISION AI</span>
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav mx-auto">
+          <li><a class="nav-link" href="{{ url_for('home_html') }}">Home</a></li>
+          <li><a class="nav-link" href="{{ url_for('about_html') }}">About</a></li>
+          <li><a class="nav-link" href="{{ url_for('finddoctors_html') }}">Find Doctor</a></li>
+          <li><a class="nav-link active" href="{{ url_for('prediction_html') }}">Our AI</a></li>
+          <li><a class="nav-link" href="{{ url_for('contact_html') }}">Contact</a></li>
+        </ul>
+
+        <ul class="navbar-nav ms-auto align-items-center">
+          <li class="nav-item" id="loginBtnContainer">
+            <button class="login-btn" onclick="window.location.href='{{ url_for('login_html') }}'">
+              Login <i class="bi bi-person"></i>
+            </button>
+          </li>
+          <li class="nav-item d-none ms-3" id="profileIconContainer">
+            <i class="bi bi-person-circle" id="openProfileBtn" role="button"></i>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<!-- SIDEBAR -->
+<aside id="profileSidebar" class="profile-sidebar">
+  <div>
+    <div class="sidebar-header">
+      <i class="bi bi-person-circle sidebar-icon"></i>
+      <h4 id="sidebarName">User Name</h4>
+      <p id="sidebarEmail">user@example.com</p>
+      <p id="sidebarMobile"></p>
+    </div>
+    <div class="sidebar-content">
+      <a href="{{ url_for('health_records_html') }}" class="btn btn-light w-100 mb-3">Health Records</a>
+    </div>
+  </div>
+  <div>
+    <button class="btn btn-danger w-100" id="logoutBtn">Logout</button>
+  </div>
+</aside>
+<div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+<!-- MAIN -->
+<main class="results-page">
+  <div class="results-container">
+    <div class="results-card">
+
+      <h2>X-ray Prediction Results</h2>
+
+      <!-- TABLE INSERTS HERE -->
+      <div id="resultsTable"></div>
+
+      <!-- PRINT BUTTON -->
+      <button class="btn btn-primary btn-sm px-4 py-2 mx-auto d-block my-3" onclick="window.print()">
+        <i class="bi bi-printer me-2"></i> Print
+      </button>
+
+      <div class="future-scope">
+        <h2>Future Scope</h2>
+        <ul>
+         <li>Integration with real-time hospital systems (PACS/HMS) for instant image capture and prediction.</li>
+          <li>API-based live doctor data and appointment booking (Practo, Apollo, ABDM).</li>
+          <li>Expansion to multiple imaging types like CT, MRI, Ultrasound, and Mammography.</li>
+          <li>Multi-modal diagnosis combining images with symptoms, vitals, and medical history.</li>
+          <li>Real-time severity detection for critical case prioritization.</li>
+          <li>Automatic PDF medical report generation.</li>
+          <li>Continuous AI model retraining pipeline.</li>
+          <li>Integration with national healthcare platforms for secure patient networking.</li>
+        </ul>
+      </div>
+
+      <button class="clear-btn" onclick="window.location.href='{{ url_for('xray_prediction_page') }}'">
+        Back to Prediction
+      </button>
+
+    </div>
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-container container">
+    <div class="footer-section">
+      <h3>About</h3>
+      <ul>
+        <li><a href="#">Care</a></li>
+        <li><a href="#">Trust</a></li>
+        <li><a href="#">Quality</a></li>
+        <li><a href="#">Service</a></li>
+        <li><a href="#">Safety</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-section">
+      <h3>Services</h3>
+      <ul>
+        <li><a href="#">Clinic</a></li>
+        <li><a href="#">Emergency</a></li>
+        <li><a href="#">Pharmacy</a></li>
+        <li><a href="#">Diseases</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-section">
+      <h3>Contact</h3>
+      <ul>
+        <li><i class="bi bi-telephone me-2"></i><a href="tel:+919876543210">+91 8522974922</a></li>
+        <li><i class="bi bi-envelope me-2"></i><a href="mailto:support@HEALTHCARE.com">support@HEALTHCARE.com</a></li>
+        <li><i class="bi bi-geo-alt me-2"></i>Hyderabad, 500001, India</li>
+        <li><i class="bi bi-globe me-2"></i><a href="https://HEALTHCARE.com">www.HEALTHCARE.com</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-section">
+      <h3>Follow Us</h3>
+      <div class="social-icons">
+        <a href="#"><i class="bi bi-facebook"></i></a>
+        <a href="#"><i class="bi bi-linkedin"></i></a>
+        <a href="#"><i class="bi bi-twitter"></i></a>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-bottom">© 2025 HealthCare. All rights reserved.</div>
+</footer>
+
+<!-- JS: Build Table (UPDATED with 3 rows + description) -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const single = window.XRAY_RESULT || null;
+    const zip = window.XRAY_ZIP_RESULTS || null;
+
+    const XRAY_DESCRIPTIONS = {
+      "Decreased Density": "Lower tissue density indicating hyperinflation, air trapping, or emphysematous changes.",
+      "Encapsulated Lesions": "Localized, well-defined abnormal mass or cyst requiring further radiologic correlation.",
+      "Increased Density": "Higher opacity suggesting consolidation, edema, tumors, or calcification.",
+      "Infectious Degenerative": "Signs of infections or degenerative changes affecting lung structure or interstitium.",
+      "Mediastinal Alterations": "Abnormal widening or shifting of mediastinal structures indicating possible pathology.",
+      "Normal Anatomy": "No abnormal opacities or structural changes detected.",
+      "Obstructive Disease": "Patterns consistent with COPD, asthma, or airway narrowing.",
+      "Pulmonary Inflammatory Process (Pneumonia)": "Lung inflammation causing consolidation or infiltrates typical of pneumonia.",
+      "Thoracic Alterations": "General abnormalities involving pleura, bones, or soft tissues."
+    };
+
+    function row(item, pred) {
+      return `
+        <tr>
+          <td>${item.filename}</td>
+          <td>${pred.class}</td>
+          <td>${pred.confidence.toFixed(2)}</td>
+          <td>${XRAY_DESCRIPTIONS[pred.class] || "-"}</td>
+          <td><img class="thumb" src="${item.image_url}"></td>
+        </tr>
+      `;
+    }
+
+    function buildRows(item) {
+      if (!item.top3) return "";
+      return item.top3.map(p => row(item, p)).join("");
+    }
+
+    let rows = "";
+    if (single) rows += buildRows(single);
+    if (Array.isArray(zip)) zip.forEach(i => rows += buildRows(i));
+
+    document.getElementById("resultsTable").innerHTML = `
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+          <thead class="table-primary">
+            <tr>
+              <th>Filename</th>
+              <th>Disease / Class</th>
+              <th>Confidence (%)</th>
+              <th>Description</th>
+              <th>Image</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    `;
+});
+</script>
+
+<!-- FIREBASE SAVE LOGIC -->
+<script type="module">
+  import { savePredictionsFromResult } from "/static/script.js";
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    const single = window.XRAY_RESULT || null;
+    const zip = Array.isArray(window.XRAY_ZIP_RESULTS) ? window.XRAY_ZIP_RESULTS : null;
+
+    if (!single && !zip) return;
+
+    try {
+      await savePredictionsFromResult({ type: "xray", single, zip });
+      console.log("X-ray results saved automatically.");
+    } catch (err) {
+      console.error("Error saving X-ray results:", err);
+    }
+  });
+</script>
+
+<script type="module" src="{{ url_for('static', filename='script.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

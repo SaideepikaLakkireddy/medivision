@@ -1,0 +1,6 @@
+The user interface of this system is developed using HTML, CSS, Bootstrap, and JavaScript, ensuring a responsive and consistent design across all modules. 
+Every UI component is connected to the backend or Firebase through event-driven interaction.
+When the user performs actions such as logging in, uploading images, selecting ZIP files, filtering doctors, or navigating between pages, the UI captures these events through JavaScript.
+These actions trigger functions that either send data to the Flask backend (for predictions) or communicate with Firebase services (for authentication, storage, and health record management).
+After the backend processes the prediction, the result page dynamically displays the output and automatically saves the prediction to Firebase Firestore.
+The UI then updates the Health Records page by fetching the saved data from Firebase and rendering it in a structured table.

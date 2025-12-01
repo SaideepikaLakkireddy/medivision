@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Doctors Finder</title>
+
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+
+<!-- AOS + Google Fonts -->
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Mozilla+Headline:wght@200..700&display=swap" rel="stylesheet" />
+
+<!-- Custom CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+  :root {
+    --primary: #0d6efd;
+    --card-radius: 12px;
+    --card-shadow: 0 6px 14px rgba(0,0,0,0.06);
+  }
+
+  body {
+    background: #c9d7ff;;
+    font-family: Arial, sans-serif;
+  }
+
+  #map {
+    height: 720px;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: var(--card-shadow);
+    background: #e9eef8;
+  }
+
+  @media (max-width: 1200px) { #map { height: 620px; } }
+  @media (max-width: 768px) { #map { height: 460px; } }
+
+  #nearbyBtn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 1000;
+    padding: 4px 10px !important;
+    font-size: 13px !important;
+    border-radius: 6px !important;
+    white-space: nowrap;
+  }
+  #resetFilters {
+  background: #3b2828 !important;
+  color: #fff !important;
+  border: none !important;
+}
+
+#resetFilters:hover {
+  background: #5c3c3c !important;
+  color: #fff !important;
+}
+
+  .doctor-card {
+    border-top: 4px solid rgba(4,80,111,0.14) !important;
+    border: 1px solid rgba(4,80,111,0.06) !important;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.04);
+  }
+
+  .doctor-card h5 { color: #04506f !important; }
+
+  .doctor-card .btn-primary {
+    background: #04506f !important;
+    border-color: #04506f !important;
+  }
+
+  .doctor-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+  }
+
+  #doctor-list {
+    max-height: 700px;
+    overflow-y: auto;
+    padding-right: 6px;
+  }
+
+  @media (max-width: 1200px) { #doctor-list { max-height: 520px; } }
+  @media (max-width: 768px) { #doctor-list { max-height: 420px; } }
+  
+</style>
+
+
+</head>
+<body>
+
+<!-- NAVBAR -->
+<header class="sticky-top">
+  <nav class="navbar navbar-expand-lg site-nav">
+    <div class="container-fluid">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('home_html') }}">
+        <img src="{{ url_for('static', filename='assets/img1.png') }}" alt="Logo" height="50" width="50"
+             class="rounded-circle">
+        <span class="fw-bold">MEDIVISION AI</span>
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('home_html') }}">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('about_html') }}">About</a></li>
+          <li class="nav-item"><a class="nav-link active" href="{{ url_for('finddoctors_html') }}">Find Doctor</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('prediction_html') }}">Our AI</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('contact_html') }}">Contact</a></li>
+        </ul>
+
+        <ul class="navbar-nav ms-auto align-items-center">
+
+            <li class="nav-item" id="loginBtnContainer">
+              <button class="login-btn" onclick="window.location.href='{{ url_for('login_html') }}'">
+                Login <i class="bi bi-person ms-1"></i>
+              </button>
+            </li>
+
+            <!-- FIXED: Correct profile icon ID for script.js -->
+            <li class="nav-item d-none ms-3" id="profileIconContainer" title="Profile">
+              <i class="bi bi-person-circle" id="openProfileBtn" role="button"></i>
+            </li>
+
+          </ul>
+
+
+      </div>
+    </div>
+  </nav>
+</header>
+
+<!-- MAIN PAGE -->
+<div class="container-fluid py-3">
+  <div class="row gx-4">
+
+    <!-- LEFT -->
+    <div class="col-lg-8">
+
+      <!-- FILTERS -->
+      <div class="card mb-3 p-3">
+        <form id="filters" class="w-100 d-flex flex-nowrap align-items-center">
+
+          <div class="me-3" style="flex:1 1 auto; min-width:220px;">
+            <input id="search-name" class="form-control" type="text" placeholder="Search by name">
+          </div>
+
+          <div class="me-3" style="flex:0 0 190px;">
+            <select id="filter-specialization" class="form-select">
+              <option value="">All Specializations</option>
+            </select>
+          </div>
+
+          <div class="me-3" style="flex:0 0 120px;">
+            <select id="filter-rating" class="form-select">
+              <option value="">Min Rating</option>
+              <option value="1">1+</option><option value="2">2+</option>
+              <option value="3">3+</option><option value="4">4+</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+
+          <div class="me-3" style="flex:0 0 120px;">
+            <select id="filter-stories" class="form-select">
+              <option value="">Stories</option>
+              <option value="10">10+</option><option value="50">50+</option>
+              <option value="100">100+</option><option value="200">200+</option>
+            </select>
+          </div>
+
+          <div style="flex:0 0 auto;">
+            <button type="button" id="resetFilters" class="btn btn-outline-secondary">Reset</button>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- CARDS -->
+      <div id="doctor-list" class="row g-3"></div>
+
+    </div>
+
+    <!-- RIGHT: MAP -->
+    <div class="col-lg-4">
+      <div id="map" class="mb-3">
+        <button id="nearbyBtn" class="btn btn-primary">Show Nearby Doctors</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-container">
+    <div class="footer-section">
+      <h3>About</h3>
+      <ul>
+        <li><a href="#">Care</a></li>
+        <li><a href="#">Trust</a></li>
+        <li><a href="#">Quality</a></li>
+        <li><a href="#">Service</a></li>
+        <li><a href="#">Safety</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-section">
+      <h3>Services</h3>
+      <ul>
+        <li><a href="#">Clinic</a></li>
+        <li><a href="#">Emergency</a></li>
+        <li><a href="#">Pharmacy</a></li>
+        <li><a href="#">Diseases</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-section">
+      <h3>Contact</h3>
+      <ul>
+        <li><i class="bi bi-telephone me-2"></i><a href="tel:+919876543210">+91 8522974922</a></li>
+        <li><i class="bi bi-envelope me-2"></i><a href="mailto:support@HEALTHCARE.com">support@HEALTHCARE.com</a></li>
+        <li><i class="bi bi-geo-alt me-2"></i>Hyderabad, 500001, India</li>
+        <li><i class="bi bi-globe me-2"></i><a href="https://HEALTHCARE.com">www.HEALTHCARE.com</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-section">
+      <h3>Follow Us</h3>
+      <div class="social-icons">
+        <a href="https://www.facebook.com"><i class="bi bi-facebook"></i></a>
+        <a href="https://www.linkedin.com"><i class="bi bi-linkedin"></i></a>
+        <a href="https://www.twitter.com"><i class="bi bi-twitter"></i></a>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    © 2025 HealthCare. All rights reserved.
+  </div>
+</footer>
+
+<!-- SIDEBAR -->
+<div id="profileSidebar" class="profile-sidebar" aria-hidden="true">
+  <div>
+    <div class="sidebar-header">
+      <i class="bi bi-person-circle sidebar-icon"></i>
+      <h4 id="sidebarName">User Name</h4>
+      <p id="sidebarEmail">user@example.com</p>
+      <p id="sidebarMobile">Mobile:</p>
+    </div>
+    <div class="sidebar-content">
+      <a href="{{ url_for('health_records_html') }}" class="btn btn-light w-100 mb-3">Health Records</a>
+    </div>
+  </div>
+
+  <div>
+    <button class="btn btn-danger w-100" id="logoutBtn">Logout</button>
+  </div>
+</div>
+
+<div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+<!-- JS LIBRARIES -->
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Main script -->
+<script type="module" src="{{ url_for('static', filename='script.js') }}"></script>
+
+<!-- Doctors Map + Filters JS -->
+<script>
+const map = L.map('map').setView([17.437, 78.448], 12);
+const doctorMarkers = [];
+let userMarker = null;
+let showingNearby = false;
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+const userIcon = L.icon({
+  iconUrl: "{{ url_for('static', filename='assets/user2.png') }}",
+  iconSize:[40,40],
+  iconAnchor:[15,30]
+});
+
+const doctorIcon = L.icon({
+  iconUrl: "{{ url_for('static', filename='assets/hospital2.png') }}",
+  iconSize:[35,35],
+  iconAnchor:[15,30]
+});
+
+function reflowMap(){
+  setTimeout(()=>{ try { map.invalidateSize(); } catch(e){} }, 250);
+}
+
+let doctorsData = [];
+
+fetch("{{ url_for('static', filename='csvjson[1].json') }}")
+  .then(r => r.json())
+  .then(data => {
+    doctorsData = data;
+    populateSpecializationFilter();
+    applyFilters();
+    showAllDoctors();
+    getUserLocation();
+  });
+
+function populateSpecializationFilter(){
+  const specSet = new Set();
+  doctorsData.forEach(doc => specSet.add(doc.Specialization));
+  const specSelect = document.getElementById("filter-specialization");
+  specSet.forEach(spec => {
+    const opt = document.createElement("option");
+    opt.value = spec;
+    opt.textContent = spec;
+    specSelect.appendChild(opt);
+  });
+}
+
+function createDoctorCards(doctors){
+  const container = document.getElementById("doctor-list");
+  container.innerHTML = "";
+
+  if(doctors.length === 0){
+    container.innerHTML = '<div class="col-12"><div class="alert alert-warning">No doctors found.</div></div>';
+    return;
+  }
+
+  doctors.forEach(doc => {
+    const col = document.createElement("div");
+    col.className = "col-12 col-sm-6 col-md-4";
+
+    const card = document.createElement("div");
+    card.className = "card doctor-card p-3 h-100";
+
+    card.innerHTML = `
+      <div>
+        <h5 class="mb-1 text-primary">${doc.Name}</h5>
+        <p class="mb-1"><strong>Specialization:</strong> ${doc.Specialization}</p>
+        <p class="mb-1"><strong>Fee:</strong> ₹${doc.Consult_Fee}</p>
+        <p class="mb-1"><strong>Stories:</strong> ${doc.Patient_stories}</p>
+        <p class="mb-2"><strong>Rating:</strong> ${doc.Rating}</p>
+      </div>
+      <div class="mt-auto">
+        <button class="btn btn-primary btn-sm view-profile">View Profile</button>
+      </div>
+    `;
+
+    card.querySelector(".view-profile").addEventListener("click", () => {
+      window.location.href = "doctor-profile.html?name=" + encodeURIComponent(doc.Name);
+    });
+
+    container.appendChild(col);
+    col.appendChild(card);
+  });
+}
+
+function applyFilters(){
+  const name = document.getElementById("search-name").value.toLowerCase();
+  const spec = document.getElementById("filter-specialization").value;
+  const minRating = parseFloat(document.getElementById("filter-rating").value) || 0;
+  const minStories = parseInt(document.getElementById("filter-stories").value) || 0;
+
+  const filtered = doctorsData.filter(doc => {
+    const matchesName = doc.Name.toLowerCase().includes(name);
+    const matchesSpec = spec ? doc.Specialization === spec : true;
+    const ratingVal = parseFloat(doc.Rating) || 0;
+    const storiesVal = parseInt(doc.Patient_stories) || 0;
+    return matchesName && matchesSpec && ratingVal >= minRating && storiesVal >= minStories;
+  });
+
+  createDoctorCards(filtered);
+
+  clearDoctorMarkers();
+
+  filtered.forEach(doc => {
+    if(!doc.Latitude || !doc.Longitude) return;
+    const marker = L.marker([doc.Latitude, doc.Longitude], {icon: doctorIcon})
+      .addTo(map)
+      .bindPopup(`<b>${doc.Name}</b><br>${doc.Address || ""}`);
+    doctorMarkers.push(marker);
+  });
+
+  if(doctorMarkers.length){
+    const group = new L.featureGroup(doctorMarkers);
+    try { /* map.fitBounds(group.getBounds().pad(0.2)); */ } catch(e){}
+  } else {
+    map.setView([17.437, 78.448], 12);
+  }
+
+  reflowMap();
+}
+
+document.getElementById("search-name").addEventListener("input", applyFilters);
+document.getElementById("filter-specialization").addEventListener("change", applyFilters);
+document.getElementById("filter-rating").addEventListener("change", applyFilters);
+document.getElementById("filter-stories").addEventListener("change", applyFilters);
+
+document.getElementById("resetFilters").addEventListener("click", () => {
+  document.getElementById("search-name").value = "";
+  document.getElementById("filter-specialization").value = "";
+  document.getElementById("filter-rating").value = "";
+  document.getElementById("filter-stories").value = "";
+  applyFilters();
+});
+
+function showAllDoctors(){
+  clearDoctorMarkers();
+  doctorsData.forEach(doc => {
+    if(!doc.Latitude || !doc.Longitude) return;
+    const marker = L.marker([doc.Latitude, doc.Longitude], {icon: doctorIcon})
+      .addTo(map)
+      .bindPopup(`<b>${doc.Name}</b><br>${doc.Address || ""}`);
+    doctorMarkers.push(marker);
+  });
+  map.setView([17.437, 78.448], 12);
+  reflowMap();
+}
+
+function showNearbyDoctors(lat, lng){
+  clearDoctorMarkers();
+  doctorsData.forEach(doc => {
+    if(!doc.Latitude || !doc.Longitude) return;
+    const dist = getDistance(lat, lng, doc.Latitude, doc.Longitude);
+    if(dist <= 5){
+      const marker = L.marker([doc.Latitude, doc.Longitude], {icon: doctorIcon})
+        .addTo(map)
+        .bindPopup(`<b>${doc.Name}</b><br>${doc.Address || ""}`);
+      doctorMarkers.push(marker);
+    }
+  });
+  reflowMap();
+}
+
+function clearDoctorMarkers(){
+  doctorMarkers.forEach(m => map.removeLayer(m));
+  doctorMarkers.length = 0;
+}
+
+function getDistance(lat1, lon1, lat2, lon2){
+  const R=6371;
+  const dLat = (lat2-lat1)*Math.PI/180;
+  const dLon = (lon2-lon1)*Math.PI/180;
+  const a = Math.sin(dLat/2)**2 +
+            Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
+            Math.sin(dLon/2)**2;
+  return 2*R*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function getUserLocation(){
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(pos => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+
+      userMarker = L.marker([lat,lng], {icon:userIcon}).addTo(map)
+        .bindPopup("<b>You are here</b>").openPopup();
+      reflowMap();
+    });
+  }
+}
+
+document.getElementById("nearbyBtn").addEventListener("click", () => {
+  if(!userMarker){ alert("Allow location access to use this."); return; }
+  const pos = userMarker.getLatLng();
+
+  if(!showingNearby){
+    showNearbyDoctors(pos.lat, pos.lng);
+    document.getElementById("nearbyBtn").innerText = "Show All Doctors";
+    showingNearby = true;
+  } else {
+    showAllDoctors();
+    document.getElementById("nearbyBtn").innerText = "Show Nearby Doctors";
+    showingNearby = false;
+  }
+});
+
+window.addEventListener("resize", reflowMap);
+window.addEventListener("load", () => setTimeout(reflowMap, 350));
+</script>
+
+</body>
+</html>

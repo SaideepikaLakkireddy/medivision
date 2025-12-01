@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About Us | Smart HealthCare System</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+  <!-- Google Fonts -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Mozilla+Headline:wght@200..700&display=swap" rel="stylesheet" />
+
+  <!-- Icons + Custom CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+
+  <!-- Smooth page animation CSS -->
+  <style>
+    body {
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 1s ease, transform 1s ease;
+    }
+    body.loaded {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- NAVBAR (MATCHES CONTACT PAGE EXACTLY) -->
+<header class="sticky-top">
+  <nav class="navbar navbar-expand-lg site-nav bg-white">
+    <div class="container-fluid">
+
+      <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('home_html') }}">
+        <img src="{{ url_for('static', filename='assets/img1.png') }}" alt="Logo" height="50" width="50" class="rounded-circle">
+        <span class="fw-bold">MEDIVISION AI</span>
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarNav">
+
+        <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('home_html') }}">Home</a></li>
+          <li class="nav-item"><a class="nav-link active" href="{{ url_for('about_html') }}">About</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('finddoctors_html') }}">Find Doctor</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('prediction_html') }}">Our AI</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('contact_html') }}">Contact</a></li>
+        </ul>
+
+        <ul class="navbar-nav ms-auto align-items-center">
+
+          <li class="nav-item" id="loginBtnContainer">
+            <button class="login-btn" onclick="window.location.href='{{ url_for('login_html') }}'">
+              Login <i class="bi bi-person ms-1"></i>
+            </button>
+          </li>
+
+          <li class="nav-item d-none ms-3" id="profileIconContainer">
+            <i class="bi bi-person-circle" id="openProfileBtn" role="button"></i>
+          </li>
+
+        </ul>
+
+      </div>
+    </div>
+  </nav>
+</header>
+
+
+<!-- ABOUT SECTION -->
+<section class="about-section py-5">
+  <div class="container">
+    <div class="row align-items-center gy-4">
+      <div class="col-lg-6">
+        <img src="{{ url_for('static', filename='assets/01.avif') }}" 
+             alt="Healthcare Professionals" class="img-fluid rounded-4 shadow-sm">
+      </div>
+
+      <div class="col-lg-6">
+        <h1 class="fw-bold mb-3 text-dark">About Us</h1>
+        <p class="text-dark">
+          Welcome to <strong>Smart HealthCare System</strong> — a patient-first platform designed to make healthcare
+          accessible, reliable, and timely. We combine digital tools with compassionate care to improve how patients
+          and providers connect.
+        </p>
+
+        <p class="text-dark">
+          Designed for clinics, telemedicine, and hospitals, Smart HealthCare reduces triage delays, enhances 
+          clinician decision-making, and maintains strict patient privacy through secure and consent-driven data 
+          handling.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- MISSION SECTION -->
+<section class="mission-section py-5" style="background-color:#f7f7f7">
+  <div class="container text-center">
+    <h2 class="fw-bold mb-5 text-dark">Our Mission</h2>
+
+    <div class="row g-4 justify-content-center">
+
+      <!-- Mission cards (unchanged) -->
+      <div class="col-md-4">
+        <div class="mission-card p-4 rounded-4 h-100" style="background-color: #c9d7ff;">
+          <i class="fas fa-bolt fa-3x mb-3"></i>
+          <h5 class="fw-semibold">Faster & Reliable Support</h5>
+          <p>Provide faster and reliable initial medical support and screening.</p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="mission-card p-4 rounded-4 h-100" style="background-color: #c9d7ff;">
+          <i class="fas fa-user-md fa-3x mb-3"></i>
+          <h5 class="fw-semibold">Right Specialist Connection</h5>
+          <p>Connect patients to the right specialists quickly and locally.</p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="mission-card p-4 rounded-4 h-100" style="background-color: #c9d7ff;">
+          <i class="fas fa-brain fa-3x mb-3"></i>
+          <h5 class="fw-semibold">AI-Driven Assistance</h5>
+          <p>Support clinicians with explainable, confidence-marked AI outputs.</p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="mission-card p-4 rounded-4 h-100" style="background-color: #c9d7ff;">
+          <i class="fas fa-microscope fa-3x mb-3"></i>
+          <h5 class="fw-semibold">Disease Prediction</h5>
+          <p>AI models predict diseases early to support quick diagnosis.</p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="mission-card p-4 rounded-4 h-100" style="background-color: #c9d7ff;">
+          <i class="fas fa-robot fa-3x mb-3"></i>
+          <h5 class="fw-semibold">Healthcare Chatbot</h5>
+          <p>Interactive chatbot with instant guidance for symptoms and FAQs.</p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="mission-card p-4 rounded-4 h-100" style="background-color: #c9d7ff;">
+          <i class="fas fa-user-doctor fa-3x mb-3"></i>
+          <h5 class="fw-semibold">Find Doctors</h5>
+          <p>Search specialists by expertise, location, and patient reviews.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- WHY CHOOSE US -->
+<section class="why-choose-section py-5">
+  <div class="container">
+
+    <div class="text-center mb-5">
+      <h2 class="fw-bold text-dark">Why Choose Us</h2>
+      <p class="text-muted mx-auto" style="max-width: 700px;">
+        A holistic healthcare experience — combining technology, trust, and empathy to ensure quality care for every patient.
+      </p>
+    </div>
+
+    <div class="row g-4">
+
+      <!-- Feature cards unchanged -->
+      <div class="col-md-4">
+        <div class="feature-card p-4 rounded-4 text-center shadow-sm h-100">
+          <i class="fas fa-lightbulb fa-2x mb-3 text-primary"></i>
+          <h5 class="text-dark">Smart Clinical Support</h5>
+          <p class="text-dark">AI outputs with confidence and suggested steps.</p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="feature-card p-4 rounded-4 text-center shadow-sm h-100">
+          <i class="fas fa-stethoscope fa-2x mb-3 text-success"></i>
+          <h5 class="text-dark">Patient-Centered Search</h5>
+          <p class="text-dark">Find doctors by specialty, language & proximity.</p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="feature-card p-4 rounded-4 text-center shadow-sm h-100">
+          <i class="fas fa-comments fa-2x mb-3 text-info"></i>
+          <h5 class="text-dark">Empathetic Chatbot</h5>
+          <p class="text-dark">24/7 conversational guidance with clear steps.</p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="feature-card p-4 rounded-4 text-center shadow-sm h-100">
+          <i class="fas fa-lock fa-2x mb-3 text-danger"></i>
+          <h5 class="text-dark">Privacy & Consent</h5>
+          <p class="text-dark">Strong data security and minimal data collection.</p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="feature-card p-4 rounded-4 text-center shadow-sm h-100">
+          <i class="fas fa-universal-access fa-2x mb-3 text-warning"></i>
+          <h5 class="text-dark">Accessible & Simple</h5>
+          <p class="text-dark">Clean, responsive UI for all kinds of users.</p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="feature-card p-4 rounded-4 text-center shadow-sm h-100">
+          <i class="fas fa-chart-line fa-2x mb-3 text-secondary"></i>
+          <h5 class="text-dark">Scalable & Integrable</h5>
+          <p class="text-dark">Modular architecture ready for expansion.</p>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-container">
+
+    <div class="footer-section">
+      <h3>About</h3>
+      <ul>
+        <li><a href="#">Care</a></li>
+        <li><a href="#">Trust</a></li>
+        <li><a href="#">Quality</a></li>
+        <li><a href="#">Service</a></li>
+        <li><a href="#">Safety</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-section">
+      <h3>Services</h3>
+      <ul>
+        <li><a href="#">Clinic</a></li>
+        <li><a href="#">Emergency</a></li>
+        <li><a href="#">Pharmacy</a></li>
+        <li><a href="#">Diseases</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-section">
+      <h3>Contact</h3>
+      <ul>
+        <li><i class="bi bi-telephone me-2"></i><a href="tel:+919876543210">+91 8522974922</a></li>
+        <li><i class="bi bi-envelope me-2"></i><a href="mailto:support@HEALTHCARE.com">support@HEALTHCARE.com</a></li>
+        <li><i class="bi bi-geo-alt me-2"></i>Hyderabad, 500001, India</li>
+        <li><i class="bi bi-globe me-2"></i><a href="https://HEALTHCARE.com">www.HEALTHCARE.com</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-section">
+      <h3>Follow Us</h3>
+      <div class="social-icons">
+        <a href="#"><i class="bi bi-facebook"></i></a>
+        <a href="#"><i class="bi bi-linkedin"></i></a>
+        <a href="#"><i class="bi bi-twitter"></i></a>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer-bottom">
+    © 2025 HealthCare. All rights reserved.
+  </div>
+</footer>
+
+
+<!-- PROFILE SIDEBAR (SAME AS CONTACT PAGE) -->
+<div id="profileSidebar" class="profile-sidebar" aria-hidden="true">
+
+  <div> <!-- WRAPPER ENSURES SPACING LIKE CONTACT PAGE -->
+
+    <div class="sidebar-header">
+      <i class="bi bi-person-circle sidebar-icon"></i>
+      <h4 id="sidebarName">User Name</h4>
+      <p id="sidebarEmail">user@example.com</p>
+      <p id="sidebarMobile">Mobile:</p>
+    </div>
+
+    <div class="sidebar-content">
+      <a href="{{ url_for('health_records_html') }}" class="btn btn-light w-100 mb-3">
+        Health Records
+      </a>
+    </div>
+
+  </div>
+
+  <div> <!-- LOGOUT WRAPPER -->
+    <button class="btn btn-danger w-100" id="logoutBtn">Logout</button>
+  </div>
+
+</div>
+
+<div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+
+
+<!-- JS (ORDER FIXED!) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Firebase + script.js (ORDER IMPORTANT!) -->
+<script type="module" src="/static/firebase-init.js"></script>
+<script type="module" src="{{ url_for('static', filename='script.js') }}"></script>
+
+<script>
+  window.addEventListener('load', () => {
+    document.body.classList.add('loaded');
+  });
+</script>
+
+</body>
+</html>

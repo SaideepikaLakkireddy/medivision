@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Health Care</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+  <!-- Google Fonts -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Mozilla+Headline:wght@200..700&display=swap" rel="stylesheet" />
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+  <style>
+    /* ✅ Smooth page load */
+    html {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: htmlFadeUp 0.9s ease-out forwards;
+    }
+    @keyframes htmlFadeUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Doctor Images */
+    .doctor-img {
+      height: 260px;
+      width: 100%;
+      object-fit: cover;
+    }
+
+    /* Service Cards */
+    .service-card {
+      border-radius: 15px;
+      background:#c9d7ff;
+      padding: 30px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transition: all 0.3s ease-in-out;
+    }
+    .service-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+    }
+
+    /* Hero Text */
+    .main-blue { color: #005eff; }
+    .enhanced-hero-text {
+      padding: 10px 20px;
+      animation: fadeSlide 1.2s ease both;
+    }
+    @keyframes fadeSlide {
+      0% { opacity: 0; transform: translateY(25px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .modern-hero-desc {
+      font-size: 1.1rem;
+      line-height: 1.7;
+      color: #000;
+      font-weight: 500;
+    }
+    .highlight {
+      background: #e4edff;
+      padding: 2px 6px;
+      border-radius: 6px;
+      color: #003fba;
+      font-weight: 600;
+      box-shadow: 0px 0px 6px rgba(0, 76, 255, 0.1);
+    }
+
+    /* Fonts for HERO + Find Doctor */
+    .hero h1, .hero h3, .finddoc-title, .finddoc-text, .finddoc-list li {
+      font-family: "Mozilla Headline", "Poppins", sans-serif;
+    }
+    .hero h1 { font-weight: 700; letter-spacing: 0.5px; line-height: 1.2; }
+    .hero .modern-hero-desc { font-weight: 500; font-size: 1.15rem; line-height: 1.75; color: #111 !important; letter-spacing: 0.3px; }
+
+    /* Find Doctor Section */
+    .finddoc-title { font-weight: 700; font-size: 2rem; letter-spacing: 0.6px; color: #000 !important; }
+    .finddoc-text { font-weight: 500; font-size: 1.05rem; line-height: 1.7; letter-spacing: 0.2px; color: #000 !important; }
+    .finddoc-list li { font-size: 1rem; font-weight: 500; color: #000 !important; }
+    .finddoc-btn { background: #3b2828 !important; color: #fff !important; border: none !important; }
+    .finddoc-btn:hover { background: #241616 !important; transform: translateY(-2px); }
+
+  </style>
+</head>
+<body>
+
+  <!-- navbar -->
+  <header class="sticky-top">
+    <nav class="navbar navbar-expand-lg site-nav">
+      <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('home_html') }}">
+          <img src="{{ url_for('static', filename='assets/img1.png') }}" alt="Logo" height="50" width="50" class="rounded-circle">
+          <span class="fw-bold">HEALTHCARE</span>
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+            <li class="nav-item"><a class="nav-link active" href="{{ url_for('home_html') }}">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('about_html') }}">About</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('finddoctors_html') }}">Find Doctor</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('prediction_html') }}">Our AI</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('contact_html') }}">Contact</a></li>
+          </ul>
+
+          <ul class="navbar-nav ms-auto align-items-center">
+
+          <li class="nav-item" id="loginBtnContainer">
+            <button class="login-btn" onclick="window.location.href='{{ url_for('login_html') }}'">
+              Login <i class="bi bi-person ms-1"></i>
+            </button>
+          </li>
+
+          <li class="nav-item d-none ms-3" id="profileIconContainer">
+            <i class="bi bi-person-circle" id="openProfileBtn" role="button"></i>
+          </li>
+
+        </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- HERO SECTION -->
+  <section class="hero py-5 position-relative">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-6 text-center text-lg-start mb-4 mb-lg-0 hero-text enhanced-hero-text" data-aos="fade-right">
+          <h1 class="display-4 fw-bold modern-hero-title">
+            <span class="main-blue">Your Health,<br> Our Priority</span>
+            <span class="heartbeat ms-2"></span>
+          </h1>
+          <h3 class="lead mt-4 modern-hero-desc">
+            Empowering lives with modern care, compassion, and cutting-edge medical expertise.
+            Our platform connects you to reliable predictions, verified specialists, and secure health guidance—
+            making healthcare simple, accessible, and truly personalized for everyone.
+          </h3>
+        </div>
+        <div class="col-lg-6 text-center">
+          <img src="{{ url_for('static', filename='assets/header.png') }}" class="img-fluid rounded hero-img" alt="Healthcare Illustration">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DOCTORS SECTION -->
+  <section class="py-5">
+    <div class="container">
+      <div class="text-center mb-4">
+        <h2 class="fw-bold text-dark">Meet Our Doctors</h2>
+        <p class="text-muted">Experienced specialists dedicated to your health</p>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-3">
+          <div class="card h-100 shadow-sm">
+            <img src="{{url_for('static',filename='assets/03.png')}}" class="card-img-top doctor-img" alt="Doctor 1">
+            <div class="card-body text-center">
+              <h5 class="card-title">Dr. Priya Sharma</h5>
+              <p class="text-muted">Cardiologist</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card h-100 shadow-sm">
+            <img src="{{url_for('static',filename='assets/01.jpg')}}" class="card-img-top doctor-img" alt="Doctor 2">
+            <div class="card-body text-center">
+              <h5 class="card-title">Dr. Anil Kumar</h5>
+              <p class="text-muted">Neurologist</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card h-100 shadow-sm">
+            <img src="{{url_for('static',filename='assets/02.jpg')}}" class="card-img-top doctor-img" alt="Doctor 3">
+            <div class="card-body text-center">
+              <h5 class="card-title">Dr. Ramesh Rao</h5>
+              <p class="text-muted">Ophthalmologist</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card h-100 shadow-sm">
+            <img src="{{url_for('static',filename='assets/04.jpg')}}" class="card-img-top doctor-img" alt="Doctor 4">
+            <div class="card-body text-center">
+              <h5 class="card-title">Dr. Sneha Patel</h5>
+              <p class="text-muted">General Physician</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FIND DOCTOR SECTION -->
+  <section class="finddoc-section" data-aos="fade-up">
+    <div class="container">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-6">
+          <h2 class="finddoc-title fw-bold">Find the Best Doctors Near You</h2>
+          <p class="finddoc-text mb-4">
+            Search for verified doctors, filter by specialization, ratings, patient stories & more.
+          </p>
+          <ul class="list-unstyled finddoc-list">
+            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Smart Filters</li>
+            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Live Location Map</li>
+            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Nearby Doctors in 5 KM</li>
+            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Real Patient Reviews</li>
+          </ul>
+          <a href="{{ url_for('finddoctors_html') }}" class="btn finddoc-btn mt-3">
+            Explore Doctors <i class="bi bi-arrow-right ms-1"></i>
+          </a>
+        </div>
+        <div class="col-lg-6 text-center">
+          <img src="{{ url_for('static', filename='assets/finddoc.png') }}" class="img-fluid finddoc-image">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES SECTION -->
+  <section class="py-5">
+    <div class="container">
+      <h2 class="text-center mb-4">Our Services</h2>
+      <div class="row gy-4">
+        <div class="col-md-4 text-center">
+          <div class="service-card">
+            <i class="bi bi-heart-pulse fs-1 text-danger"></i>
+            <h5 class="mt-3 fw-bold">Cardiology</h5>
+            <p>Advanced heart care with expert cardiologists.</p>
+          </div>
+        </div>
+        <div class="col-md-4 text-center">
+          <div class="service-card">
+            <i class="bi bi-bandaid fs-1 text-success"></i>
+            <h5 class="mt-3 fw-bold">Orthopedics</h5>
+            <p>Comprehensive bone and joint treatments.</p>
+          </div>
+        </div>
+        <div class="col-md-4 text-center">
+          <div class="service-card">
+            <i class="bi bi-people fs-1 text-info"></i>
+            <h5 class="mt-3 fw-bold">Pediatrics</h5>
+            <p>Compassionate care for children and adolescents.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-container">
+      <div class="footer-section">
+        <h3>About</h3>
+        <ul>
+          <li><a href="#">Care</a></li>
+          <li><a href="#">Trust</a></li>
+          <li><a href="#">Quality</a></li>
+          <li><a href="#">Service</a></li>
+          <li><a href="#">Safety</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h3>Services</h3>
+        <ul>
+          <li><a href="#">Clinic</a></li>
+          <li><a href="#">Emergency</a></li>
+          <li><a href="#">Pharmacy</a></li>
+          <li><a href="#">Diseases</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h3>Contact</h3>
+        <ul>
+          <li><i class="bi bi-telephone me-2"></i><a href="tel:+918522974922">+91 8522974922</a></li>
+          <li><i class="bi bi-envelope me-2"></i><a href="mailto:support@HEALTHCARE.com">support@HEALTHCARE.com</a></li>
+          <li><i class="bi bi-geo-alt me-2"></i>Hyderabad, India</li>
+          <li><i class="bi bi-globe me-2"></i><a href="#">www.HEALTHCARE.com</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h3>Follow Us</h3>
+        <div class="social-icons">
+          <a href="#"><i class="bi bi-facebook"></i></a>
+          <a href="#"><i class="bi bi-linkedin"></i></a>
+          <a href="#"><i class="bi bi-twitter"></i></a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2025 HealthCare. All rights reserved.</div>
+  </footer>
+
+  <!-- PROFILE SIDEBAR (SAME AS CONTACT PAGE) -->
+<div id="profileSidebar" class="profile-sidebar" aria-hidden="true">
+
+  <div> <!-- WRAPPER ENSURES SPACING LIKE CONTACT PAGE -->
+
+    <div class="sidebar-header">
+      <i class="bi bi-person-circle sidebar-icon"></i>
+      <h4 id="sidebarName">User Name</h4>
+      <p id="sidebarEmail">user@example.com</p>
+      <p id="sidebarMobile">Mobile:</p>
+    </div>
+
+    <div class="sidebar-content">
+      <a href="{{ url_for('health_records_html') }}" class="btn btn-light w-100 mb-3">
+        Health Records
+      </a>
+    </div>
+
+  </div>
+
+  <div> <!-- LOGOUT WRAPPER -->
+    <button class="btn btn-danger w-100" id="logoutBtn">Logout</button>
+  </div>
+
+</div>
+
+<div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+  <!-- Bootstrap Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- AOS -->
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>
+    AOS.init();
+  </script>
+  <!-- Main Script -->
+  <script type="module" src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
