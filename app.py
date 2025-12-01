@@ -8,14 +8,17 @@ from PIL import Image
 import uuid
 from werkzeug.utils import secure_filename
 
-app = Flask(__name__)
-
+app = Flask(
+    __name__,
+    template_folder="UI/templates",
+    static_folder="UI/static"
+)
 
 # ----------------------------------------------------------
-#                   FOLDERS (now under static so files are public)
+# FOLDERS (UPDATED)
 # ----------------------------------------------------------
-UPLOAD_BASE = os.path.join("static", "uploads")
-UPLOAD_FOLDER = UPLOAD_BASE  # kept for compatibility
+UPLOAD_BASE = os.path.join("UI", "static", "uploads")
+UPLOAD_FOLDER = UPLOAD_BASE
 SKIN_FOLDER = os.path.join(UPLOAD_BASE, "skin")
 XRAY_FOLDER = os.path.join(UPLOAD_BASE, "xray")
 SKIN_EXTRACT_FOLDER = os.path.join(UPLOAD_BASE, "skin_extracted")
@@ -25,11 +28,17 @@ for folder in [UPLOAD_BASE, SKIN_FOLDER, XRAY_FOLDER, SKIN_EXTRACT_FOLDER, XRAY_
     os.makedirs(folder, exist_ok=True)
 
 # ----------------------------------------------------------
-#                   LOAD MODELS (FIXED PATHS)
+# LOAD MODELS WITH FIXED PATHS
 # ----------------------------------------------------------
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_DIR = os.path.join(BASE_DIR, "UI", "Trained Model files")
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))     # UI/
-MODEL_DIR = os.path.join(BASE_DIR, "Trained Model files")  # UI/Trained Model files/
+zip_path = os.path.join(MODEL_DIR, "xray_classifier_model.zip")
+keras_path = os.path.join(MODEL_DIR, "xray_classifier_model.keras")
+
+if os.path.exists(zip_path) and not os.path.exists(keras_path):
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        zip_ref.extractall(MODEL_DIR)
 
 try:
     skin_model = load_model(os.path.join(MODEL_DIR, "skin_cancer_scratch_model.keras"))
@@ -44,6 +53,7 @@ try:
 except Exception as e:
     print("X-ray model not loaded:", e)
     XRAY_AVAILABLE = False
+
 
 
 # ----------------------------------------------------------
@@ -317,4 +327,5 @@ def xray_result_page():
 #                  RUN APP
 # ----------------------------------------------------------
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)))
+
