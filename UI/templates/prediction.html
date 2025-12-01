@@ -228,32 +228,6 @@
       updateAuthUI(user);
     });
 
-    // intercept prediction buttons
-    function attachPredictionGuards() {
-      const predictButtons = Array.from(document.querySelectorAll('.go-predict'));
-      predictButtons.forEach(btn => {
-        // remove any inline handlers just in case (they were removed earlier)
-        btn.addEventListener('click', (e) => {
-          e.preventDefault();
-          const target = btn.dataset.target;
-          if (!target) return;
-
-          if (!isLoggedIn) {
-            // ask user to login first
-            const goLogin = confirm('Please log in first !');
-            if (goLogin) {
-              // redirect to login page
-              window.location.href = "{{ url_for('login_html') }}";
-            } else {
-              // user chose to stay — do nothing
-            }
-          } else {
-            // proceed to prediction page
-            window.location.href = target;
-          }
-        });
-      });
-    }
 
     // run on DOM ready
     if (document.readyState === 'loading') {
